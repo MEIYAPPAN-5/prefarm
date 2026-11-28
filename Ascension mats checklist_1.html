@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ascension mats checklist</title>
+<style>
+:root{--bg:#f2f4f7;--card:#fff;--ink:#1c2430;--mute:#66707e;--line:#d8dde5;--ok:#1f8a4c;--bad:#b4472f;--acc:#2f82c4;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12151b;--card:#1b2029;--ink:#e7ebf1;--mute:#94a0b0;--line:#2c3441;--ok:#4cc27d;--bad:#e5836b;--acc:#5aa9e6}}
+:root[data-theme="dark"]{--bg:#12151b;--card:#1b2029;--ink:#e7ebf1;--mute:#94a0b0;--line:#2c3441;--ok:#4cc27d;--bad:#e5836b;--acc:#5aa9e6}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;line-height:1.4}
+main{max-width:680px;margin:0 auto;padding:16px 14px 48px}
+main[data-c="dan"],main[data-c="tor"]{--acc:#9a6ad8}
+h1{font-size:1.3rem;margin:0 0 12px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.tabs button:last-child:nth-child(odd){grid-column:1/-1}
+.tabs button{flex:1;padding:11px;font-weight:600;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink)}
+.tabs button.on{border-color:var(--acc);color:var(--acc)}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:1px}
+.sum{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--acc);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.sum b{font-size:1.05rem}
+.bar{height:8px;border-radius:4px;background:var(--line);margin:8px 0 6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc)}
+.mute{color:var(--mute);font-size:.86rem}
+.item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.item.ok{border-color:var(--ok)}
+.hd{display:flex;gap:10px;align-items:center}
+.hd input[type=checkbox]{width:22px;height:22px;accent-color:var(--ok);flex:none}
+.nm{flex:1;min-width:0;border:0;border-bottom:1px dashed var(--line);background:transparent;color:var(--ink);font:inherit;font-weight:600;padding:3px 0}
+.st{font-size:.88rem;margin:8px 0 0;color:var(--bad)}
+.ok .st{color:var(--ok)}
+.st:empty{display:none}
+.bk{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:14px}
+.bk textarea{width:100%;font:inherit;font-size:.8rem;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.bkb{padding:8px 12px;border-radius:8px;border:1px solid var(--acc);background:var(--acc);color:#fff;font-weight:600;margin:8px 8px 0 0}
+.st2{margin-top:2px}
+.item.mid{border-color:#c78a14}
+.item.mid .g input{border:2px solid #c78a14;background:color-mix(in srgb,#c78a14 20%,var(--card));font-weight:700}
+.ok .g input,.ok .one input{border:2px solid var(--ok);background:color-mix(in srgb,var(--ok) 20%,var(--card));font-weight:700}
+.g{display:grid;gap:8px;margin-top:10px}
+.g label{display:block;font-size:.8rem;color:var(--mute)}
+.g input,.one input{width:100%;padding:8px;font-size:1rem;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.need{font-size:.82rem;color:var(--mute);margin-top:2px}
+.one{display:flex;gap:10px;align-items:center;margin-top:10px}
+.one input{max-width:160px}
+.add{display:flex;gap:8px;align-items:center;margin-top:8px}
+.add button{padding:8px 12px;border-radius:8px;border:1px solid var(--acc);background:var(--acc);color:#fff;font-weight:600;white-space:nowrap}
+.add .g{margin:0;flex:1}
+</style>
+</head>
+<body>
+<main id="app" data-c="ana">
+<h1>Ascension mats checklist</h1>
+<div class="tabs"><button id="tab-ana">Anastasya</button><button id="tab-dan">Danica</button><button id="tab-sil">Silverdawn</button><button id="tab-boa">Battle of Atonement</button><button id="tab-tor">Torrents of Spring</button></div>
+<div class="sum" id="sum"></div>
+<div id="list"></div>
+<p class="mute">Tick the simple rows yourself. Talent books and enemy drops tick themselves (and their boxes go green) once your mats are enough, even without crafting.</p>
+</main>
+<script>
+var KEY="asc-tracker-v2";
+function mk(n,need,have){return{name:n,need:need,have:have||need.map(function(){return 0}),man:false}}
+function items(a,b,books,sp){var l=[mk("Mora",[7100000]),mk("EXP books",[419])];if(a)l.push(mk(a,[18]));l.push(mk("Crown of Insight",[3]),mk(sp||"Local specialty",[168]));if(b)l.push(mk(b,[46]));l.push(mk("Gems",[1,9,9,6]),mk("Talent books",[9,63,114],books),mk("Enemy drops",[36,96,129]));return l}
+function mkl(n,need,labels){var x=mk(n,need);x.labels=labels;return x}
+function wItems(k){var A=k==="sil";return[
+ mkl(A?"Weapon ascension: Frost Emperor’s":"Weapon ascension: Pale Star Army",[5,14,14,6],A?["Revival","Ceremony","Lament","Farewell"]:["Rise","Muster","Clarion","Triumph"]),
+ mkl(A?"Elite enemy drops: Snowborn":"Elite enemy drops: Accreted",[23,27,41],A?["Heartshard","Mirrorheart","Heart of Ignorance"]:["Fragment","Mass","Growth"]),
+ mkl(A?"Common enemy drops: Ethereal":"Common enemy drops: Chimeric",[15,23,27],A?["Glimmershard","Crystal","Crystalscale Stone"]:["Core","Nucleus","Nexus"]),
+ mk("Mora (weapon Lv. 90)",[1131445])]}
+var s={v:3,tab:"ana",c:{ana:items(null,"Boss: Wavebinder",[88,83,12],"Fairywormwood"),dan:items("Weekly Boss: Dottore 2 branch",null,null,"Flockingweed"),sil:wItems("sil"),tor:wItems("tor")}};
+try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&p.c&&p.c.ana&&p.c.dan){if(!p.v){["ana","dan"].forEach(function(k){p.c[k]=p.c[k].filter(function(it){return !/\(new\)/.test(it.name)})});p.v=3}[["ana","Fairywormwood"],["dan","Flockingweed"]].forEach(function(r){p.c[r[0]].forEach(function(it){if(it.name==="Local specialty")it.name=r[1]})});p.c.ana.forEach(function(it){if(it.name==="Item 46")it.name="Boss: Wavebinder"});p.c.dan.forEach(function(it){if(it.name==="Item 18")it.name="Weekly Boss: Dottore 2 branch"});s=p;}}}catch(e){}
+function bItems(){return[mkl("Weapon ascension: Pale Star Army",[3,9,9,4],null),mkl("Elite enemy drops: Life",[15,18,27],null),mkl("Common enemy drops: Chimeric",[10,15,18],null),mk("Mora",[150000])]}
+if(!s.c.sil)s.c.sil=wItems("sil");if(!s.c.tor)s.c.tor=wItems("tor");if(!s.c.boa)s.c.boa=bItems();
+function fixTor(){var a=s.c.tor;if(a.some(function(x){return x.link==="ana"}))return;
+ var c=a.filter(function(x){return /^Common enemy drops/.test(x.name)})[0];if(!c)return;
+ if(!c.base)c.base=c.need.slice();c.link="ana+boa";c.name="Common enemy drops: Chimeric (Anastasya’s + Battle of Atonement + weapon total)";
+ var n=mkl("Common enemy drops: Chimeric (Anastasya’s + weapon total)",c.base.slice(),null);n.base=c.base.slice();n.link="ana";n.have=c.have;
+ s.c.tor=a.filter(function(x){return x!==c}).concat([n,c])}
+function fixLinks(){
+ var big=function(tab){return s.c[tab].filter(function(x){return x.need.length===3&&x.need[2]===129})[0]},
+ cm=function(tab){return s.c[tab].filter(function(x){return /^Common enemy drops/.test(x.name)})[0]},
+ pa=function(tab){return s.c[tab].filter(function(x){return x.need.length===4})[0]};
+ function lk(it,t,extra,nm,tag){if(!it||!t)return;if(!it.base)it.base=it.need.slice();if(it.link!==tag){it.link=tag;it.name=nm}it.have=t.have;it.need=it.base.map(function(v,i){return v+t.need[i]+(extra?extra.base[i]:0)})}
+ lk(cm("sil"),big("dan"),null,"Common enemy drops: Ethereal (Danica’s + weapon total)","dan");
+ lk(cm("boa"),big("ana"),null,"Common enemy drops: Chimeric (Anastasya’s + weapon total)","ana");
+ lk(s.c.tor.filter(function(x){return x.link==="ana+boa"})[0],big("ana"),cm("boa"),"Common enemy drops: Chimeric (Anastasya’s + Battle of Atonement + weapon total)","ana+boa");
+ lk(s.c.tor.filter(function(x){return x.link==="ana"})[0],big("ana"),null,"Common enemy drops: Chimeric (Anastasya’s + weapon total)","ana");
+ lk(pa("tor"),pa("boa"),null,"Weapon ascension: Pale Star Army (Battle of Atonement + weapon total)","boa");
+}
+s.c.sil.concat(s.c.tor,s.c.boa).forEach(function(it){if(it.need.length===4){it.calc=true;it.labels=["2★","3★","4★","5★"]}else if(/^Elite enemy drops/.test(it.name))it.labels=["2★","3★","4★"];else if(it.labels)delete it.labels});
+fixTor();
+fixLinks();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
+function $(id){return document.getElementById(id)}
+function num(v){v=parseInt(v,10);return isNaN(v)||v<0?0:v}
+function fmt(n){return n.toLocaleString("en-IN")}
+function names(n){return n===4?["Sliver","Fragment","Chunk","Gemstone"]:["1★","2★","3★"]}
+function calc(it){var n=it.need.length,carry=0,def=[];
+ for(var t=n-1;t>=1;t--){var d=Math.max(0,it.need[t]+carry-it.have[t]);def[t]=d;carry=3*d}
+ return{def:def,short:Math.max(0,it.need[0]+carry-it.have[0])}}
+var refs=[];
+var vw=[];
+function makeView(){var o=[];cur().forEach(function(it){o.push(it);if(it.need.length===3&&it.need[2]===114)o.push({name:"Talent books: double crown",need:DC.slice(),have:it.have,man:!!it.man2,dcOf:it,fixed:true})});return o}
+function cur(){return s.c[s.tab]}
+function build(){
+ $("app").setAttribute("data-c",s.tab);
+ ["ana","dan","sil","boa","tor"].forEach(function(k){$("tab-"+k).className=s.tab===k?"on":""});
+ var box=$("list");box.innerHTML="";refs=[];
+ vw=makeView();vw.forEach(function(it,i){
+  var n=it.need.length,tn=n>1?(it.labels||names(n)):[""],d=document.createElement("div");d.className="item";
+  var hd=document.createElement("div");hd.className="hd";
+  var cb=document.createElement("input");cb.type="checkbox";cb.setAttribute("aria-label","Done");
+  var nm=document.createElement("input");nm.className="nm";nm.type="text";nm.value=it.name;nm.setAttribute("aria-label","Material name");if(it.fixed)nm.readOnly=true;
+  hd.appendChild(cb);hd.appendChild(nm);d.appendChild(hd);
+  var inputs=[],adds=[];
+  if(n!==3&&!it.calc){
+   var sp=document.createElement("span");sp.className="mute";sp.style.display="block";sp.style.marginLeft="32px";sp.textContent=it.labels?it.need.map(function(v,i){return v+" × "+it.labels[i]}).join(", "):"Need "+it.need.map(fmt).join(" / ");d.appendChild(sp);
+   if(n===1&&it.need[0]===168){var o=document.createElement("div");o.className="one";var ci=document.createElement("input");ci.type="number";ci.min="0";ci.inputMode="numeric";ci.value=it.have[0];ci.setAttribute("aria-label","How many I have");inputs.push(ci);var cs=document.createElement("span");cs.className="mute";cs.textContent="of 168";o.appendChild(ci);o.appendChild(cs);d.appendChild(o);}
+  }else{
+   var g=document.createElement("div");g.className="g";g.style.gridTemplateColumns="repeat("+n+",1fr)";
+   for(var t=0;t<n;t++){var w=document.createElement("div");
+    var l=document.createElement("label");l.textContent=tn[t];
+    var inp2=document.createElement("input");inp2.type="number";inp2.min="0";inp2.inputMode="numeric";inp2.value=it.have[t];
+    var nd=document.createElement("div");nd.className="need";nd.textContent="need "+it.need[t]+(it.base?" ("+(it.need[t]-it.base[t])+" + "+it.base[t]+")":"");
+    w.appendChild(l);w.appendChild(inp2);w.appendChild(nd);g.appendChild(w);inputs.push(inp2);}
+   d.appendChild(g);
+  }
+  var st=document.createElement("p");st.className="st";d.appendChild(st);
+  var st2=null;
+  box.appendChild(d);
+  inputs.forEach(function(inp,k){inp.addEventListener("input",function(){it.have[k]=num(inp.value);save();update()});inp.addEventListener("blur",function(){inp.value=it.have[k]})});
+  nm.addEventListener("input",function(){it.name=nm.value;save()});
+  cb.addEventListener("change",function(){var r=status(it);if(r.ok){cb.checked=true;return}it.man=cb.checked;if(it.dcOf)it.dcOf.man2=it.man;save();update()});
+  refs.push({d:d,cb:cb,st:st,st2:st2,inp:inputs});
+ });
+ update();
+}
+function status(it){
+ var n=it.need.length;
+ if(n!==3&&!it.calc){if(n===1&&it.need[0]===168){var k=it.have[0]>=168;return{ok:k,txt:k?"Enough":"Need "+(168-it.have[0])+" more"}}return{ok:false,txt:"",plain:true}}
+ var r=calc(it),tn=it.labels||names(n);
+ if(r.short===0){var parts=[];
+  for(var t=1;t<n;t++)if(r.def[t]>0)parts.push("craft "+r.def[t]+" × "+tn[t]+" (uses "+(3*r.def[t])+" "+tn[t-1]+")");
+  return{ok:true,txt:(it.fixed?"Ready for double crown. ":"Enough, stop farming. ")+(parts.length?"To finish: "+parts.join(", then ")+".":"No crafting needed.")}}
+ var top=Math.ceil(r.short/Math.pow(3,n-1));
+ return{ok:false,txt:"Short by "+r.short+" × "+tn[0]+" worth (about "+top+" more "+tn[n-1]+")"};
+}
+var DC=[6,42,76];
+function dcText(it){var r=calc({need:DC,have:it.have});
+ if(r.short===0){var p=[];for(var t=1;t<3;t++)if(r.def[t]>0)p.push("craft "+r.def[t]+" × "+names(3)[t]);return{ok:true,txt:"Double crown (6 / 42 / 76): ready"+(p.length?". To finish: "+p.join(", then ")+".":".")}}
+ return{ok:false,txt:"Double crown (6 / 42 / 76): short by "+r.short+" × 1★ worth"}}
+function update(){
+ var its=vw,done=0,left=[];
+ its.forEach(function(it,i){var r=status(it),f=r.ok||it.man,x=refs[i];
+  x.inp.forEach(function(inp,k){if(document.activeElement!==inp)inp.value=it.have[k]});x.cb.checked=f;x.d.className="item"+(f?" ok":"");
+  x.st.textContent=r.plain?"":((r.ok||!it.man)?r.txt:"Marked done by you. "+r.txt);
+  if(f)done++;else left.push(it.name)});
+ var pct=Math.round(100*done/its.length);
+ $("sum").innerHTML="<b>"+done+" of "+its.length+" materials ready</b><div class='bar'><i style='width:"+pct+"%'></i></div><div class='mute'></div>";
+ $("sum").lastChild.textContent=left.length?"Still farming: "+left.join(", "):"Everything is ready.";
+}
+["ana","dan","sil","boa","tor"].forEach(function(k){$("tab-"+k).addEventListener("click",function(){s.tab=k;save();build()})});
+build();
+</script>
+</body>
+</html>
